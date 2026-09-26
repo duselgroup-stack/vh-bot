@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% from "_macros.html" import listing_card %}
+{% block content %}
+<section class="hero">
+  <div class="hero-watermark" aria-hidden="true">VOHA UYLARI</div>
+  <div class="container hero-inner">
+    <p class="eyebrow">Qashqadaryo · Ko‘chmas mulk</p>
+    <h1>Sizda uy bo‘lsa,<br><span class="gold">biz uni kuchliroq sotamiz.</span></h1>
+    <p class="hero-lead">Professional syomka, videoli e’lonlar va hamkor maklerlar tarmog‘i. Har bir obyekt — yagona ID, shaffof shartlar.</p>
+
+    <form class="search-box" action="/uylar" method="get">
+      <div class="seg" role="radiogroup" aria-label="Bitim turi">
+        <label><input type="radio" name="turi" value="s" checked><span>Sotib olish</span></label>
+        <label><input type="radio" name="turi" value="r"><span>Ijaraga olish</span></label>
+      </div>
+      <div class="search-fields">
+        <label class="field">
+          <span>Hudud</span>
+          <select name="hudud">
+            <option value="">Barcha hududlar</option>
+            {% for d in DISTRICTS %}<option value="{{ loop.index0 }}">{{ d }}</option>{% endfor %}
+          </select>
+        </label>
+        <label class="field">
+          <span>Mulk turi</span>
+          <select name="mulk">
+            <option value="">Barcha turlar</option>
+            {% for k, v in PROPERTY_TYPES.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}
+          </select>
+        </label>
+        <label class="field">
+          <span>Xonalar</span>
+          <select name="xona">
+            <option value="">Farqi yo‘q</option>
+            {% for n in range(1, 6) %}<option value="{{ n }}">{{ n }}{{ '+' if n == 5 }}</option>{% endfor %}
+          </select>
+        </label>
+        <label class="field">
+          <span>Narx gacha, mln</span>
+          <input type="number" name="narx_max" min="0" step="any" inputmode="decimal" placeholder="masalan, 800">
+        </label>
+        <button class="btn btn-gold btn-search" type="submit">Qidirish</button>
+      </div>
+    </form>
+
+    <div class="hero-stats">
+      <div><b>{{ counts.active }}</b><span>faol e’lon</span></div>
+      <div><b>{{ DISTRICTS|length }}</b><span>shahar va tuman</span></div>
+      <div><b>{{ counts.brokers }}</b><span>hamkor makler</span></div>
+      <div><b>{{ counts.closed }}</b><span>yakunlangan bitim</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Yangi e’lonlar</p>
+        <h2>Sotuvdagi uylar</h2>
+      </div>
+      <a class="link-arrow" href="/uylar">Barchasini ko‘rish →</a>
+    </div>
+    {% if latest %}
+      <div class="grid-cards">{% for l in latest %}{{ listing_card(l) }}{% endfor %}</div>
+    {% else %}
+      <div class="empty">
+        <p>Tez orada bu yerda yangi e’lonlar paydo bo‘ladi.</p>
+        <a class="btn btn-green" href="{{ bot_link }}" target="_blank" rel="noopener">Yangi e’lonlarga obuna bo‘lish</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% if district_counts %}
+<section class="section section-tint">
+  <div class="container">
+    <p class="eyebrow">Hududlar bo‘yicha</p>
+    <h2>Qayerdan uy qidiryapsiz?</h2>
+    <div class="chips">
+      {% for d, n in district_counts.items() %}
+        <a class="chip" href="/uylar?turi=all&hudud={{ DISTRICTS.index(d) }}">{{ d }} <b>{{ n }}</b></a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if rent %}
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Ijara</p>
+        <h2>Ijaraga beriladigan uylar</h2>
+      </div>
+      <a class="link-arrow" href="/uylar?turi=r">Barchasi →</a>
+    </div>
+    <div class="grid-cards">{% for l in rent %}{{ listing_card(l) }}{% endfor %}</div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section section-dark">
+  <div class="container">
+    <p class="eyebrow gold">Bitta tizim — uch tomon</p>
+    <h2>Har kimga o‘z yo‘li</h2>
+    <div class="roles">
+      <article class="role">
+        <span class="role-num">01</span>
+        <h3>Xaridor</h3>
+        <p>Hudud, narx, xonalar soni bo‘yicha qidiring, videoni ko‘ring va bir tugma bilan uy ko‘rishga yoziling.</p>
+        <a class="link-arrow gold" href="/uylar">Uy tanlash →</a>
+      </article>
+      <article class="role">
+        <span class="role-num">02</span>
+        <h3>Uy egasi</h3>
+        <p>Syomka, video montaj va Instagram/Telegram reklamasi. Komissiya faqat uy sotilganda.</p>
+        <a class="link-arrow gold" href="/uy-sotish">Uyni sotish →</a>
+      </article>
+      <article class="role">
+        <span class="role-num">03</span>
+        <h3>Makler</h3>
+        <p>Obyektingizni biz bilan kuchliroq soting, mijozingizga bazamizdan uy toping. Mijozingiz sizda qoladi.</p>
+        <a class="link-arrow gold" href="/hamkorlik">Hamkor bo‘lish →</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <p class="eyebrow">Ishonch</p>
+    <h2>Hamma narsa tizimda qayd etiladi</h2>
+    <div class="features">
+      <div class="feature"><span class="feature-num">01</span><h3>Yagona ID</h3><p>Har bir obyekt o‘z raqamiga ega (masalan, VU-0248). E’lon, video va bitim bitta raqamga bog‘lanadi.</p></div>
+      <div class="feature"><span class="feature-num">02</span><h3>Obyekt manbasi</h3><p>Mulk egasini kim olib kelgani tizimda aniq ko‘rsatiladi.</p></div>
+      <div class="feature"><span class="feature-num">03</span><h3>Xaridor manbasi</h3><p>Mijoz makler, Instagram, Telegram, bot yoki sayt orqali kelgani belgilanadi.</p></div>
+      <div class="feature"><span class="feature-num">04</span><h3>Oldindan kelishuv</h3><p>Kim xizmat ko‘rsatishi va kim qancha olishi sotuvdan oldin kelishiladi.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container cta-inner">
+    <div>
+      <h2>Sizda xaridor bo‘lsa, <span class="gold">bizda sotiladigan obyektlar bor.</span></h2>
+      <p>Qo‘shilish bepul. Komissiya faqat bitimdan.</p>
+    </div>
+    <a class="btn btn-gold btn-lg" href="/hamkorlik">Hamkorlik shartlari</a>
+  </div>
+</section>
+{% endblock %}

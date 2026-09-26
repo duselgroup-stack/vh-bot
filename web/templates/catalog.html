@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% from "_macros.html" import listing_card %}
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <nav class="crumbs"><a href="/">Bosh sahifa</a><span>/</span>E’lonlar</nav>
+    <h1>{{ heading }}</h1>
+    <p class="muted">{{ total }} ta obyekt topildi</p>
+  </div>
+</section>
+
+<section class="container catalog">
+  <details class="filters" open data-collapse-mobile>
+    <summary>Filtrlar</summary>
+    <form method="get" action="/uylar" class="filter-form">
+      <div class="seg seg-light" role="radiogroup" aria-label="Bitim turi">
+        {% for val, label in [('s', 'Sotuv'), ('r', 'Ijara'), ('all', 'Barchasi')] %}
+          <label><input type="radio" name="turi" value="{{ val }}" {{ 'checked' if f.turi == val }}><span>{{ label }}</span></label>
+        {% endfor %}
+      </div>
+      <label class="field">
+        <span>Hudud</span>
+        <select name="hudud">
+          <option value="">Barcha hududlar</option>
+          {% for d in DISTRICTS %}<option value="{{ loop.index0 }}" {{ 'selected' if f.hudud == loop.index0 }}>{{ d }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="field">
+        <span>Mulk turi</span>
+        <select name="mulk">
+          <option value="">Barcha turlar</option>
+          {% for k, v in PROPERTY_TYPES.items() %}<option value="{{ k }}" {{ 'selected' if f.mulk == k }}>{{ v }}</option>{% endfor %}
+        </select>
+      </label>
+      <fieldset class="field">
+        <span>Xonalar</span>
+        <div class="rooms">
+          <label><input type="radio" name="xona" value="" {{ 'checked' if not f.xona }}><span>Farqi yo‘q</span></label>
+          {% for n in range(1, 6) %}
+            <label><input type="radio" name="xona" value="{{ n }}" {{ 'checked' if f.xona == n }}><span>{{ n }}{{ '+' if n == 5 }}</span></label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      <div class="field">
+        <span>Narx, mln so‘m</span>
+        <div class="range">
+          <input type="number" name="narx_min" min="0" step="any" inputmode="decimal" placeholder="dan" value="{{ f.narx_min }}" aria-label="Narx dan (mln)">
+          <input type="number" name="narx_max" min="0" step="any" inputmode="decimal" placeholder="gacha" value="{{ f.narx_max }}" aria-label="Narx gacha (mln)">
+        </div>
+      </div>
+      {% if f.saralash != 'new' %}<input type="hidden" name="saralash" value="{{ f.saralash }}">{% endif %}
+      <button class="btn btn-green btn-block" type="submit">Ko‘rsatish</button>
+      <a class="btn btn-ghost btn-block" href="/uylar?turi={{ f.turi }}">Tozalash</a>
+    </form>
+  </details>
+
+  <div class="results">
+    <div class="results-bar">
+      <span class="muted">Saralash:</span>
+      {% for key, label in [('new', 'Yangilari'), ('cheap', 'Arzonroq'), ('expensive', 'Qimmatroq'), ('popular', 'Ommabop')] %}
+        <a class="sort {{ 'active' if f.saralash == key }}" href="{{ sort_url(key) }}">{{ label }}</a>
+      {% endfor %}
+    </div>
+    {% if listings %}
+      <div class="grid-cards grid-3">{% for l in listings %}{{ listing_card(l) }}{% endfor %}</div>
+      {% if pages > 1 %}
+      <nav class="pager" aria-label="Sahifalar">
+        {% if f.sahifa > 1 %}<a href="{{ page_url(f.sahifa - 1) }}">← Oldingi</a>{% endif %}
+        {% for n in range(1, pages + 1) %}
+          {% if n == f.sahifa %}<span class="current">{{ n }}</span>
+          {% elif n <= 2 or n > pages - 2 or (n - f.sahifa)|abs <= 1 %}<a href="{{ page_url(n) }}">{{ n }}</a>
+          {% elif n == 3 or n == pages - 2 %}<span class="gap">…</span>{% endif %}
+        {% endfor %}
+        {% if f.sahifa < pages %}<a href="{{ page_url(f.sahifa + 1) }}">Keyingi →</a>{% endif %}
+      </nav>
+      {% endif %}
+    {% else %}
+      <div class="empty">
+        <h3>Hozircha mos obyekt yo‘q</h3>
+        <p>Filtrni kengaytiring yoki Telegram-botda obuna bo‘ling — mos uy chiqishi bilan xabar beramiz.</p>
+        <a class="btn btn-green" href="{{ bot_link }}" target="_blank" rel="noopener">Botda obuna bo‘lish</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

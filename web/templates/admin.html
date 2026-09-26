@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status_badge, lead_badge %}
+{% block content %}
+{% set s = stats %}
+<section class="page-head dash-head">
+  <div class="container dash-head-row">
+    <div>
+      <p class="eyebrow">Admin panel</p>
+      <h1>Savdo statistikasi</h1>
+      <div class="period">
+        {% for d in (7, 30, 90, 365) %}<a class="sort {{ 'active' if d == days }}" href="/admin?davr={{ d }}">{{ d }} kun</a>{% endfor %}
+      </div>
+    </div>
+    <div class="dash-actions">
+      <a class="btn btn-tg" href="{{ bot_link }}" target="_blank" rel="noopener">Botda boshqarish</a>
+      <a class="btn btn-ghost" href="/chiqish">Chiqish</a>
+    </div>
+  </div>
+</section>
+
+<section class="container dash">
+  <div class="kpis">
+    <div class="kpi"><span>Faol hamkor maklerlar</span><b>{{ s.brokers_active }}</b><small>tasdiqlangan: {{ s.brokers_approved }}</small></div>
+    <div class="kpi"><span>Faol obyektlar</span><b>{{ s.listings.get('active', 0) + s.listings.get('negotiation', 0) }}</b><small>yangi: {{ s.listings_new }}</small></div>
+    <div class="kpi"><span>Malakali murojaatlar</span><b>{{ s.leads_qualified }}</b><small>davrda: {{ s.leads_new }} · jami: {{ s.leads_total }}</small></div>
+    <div class="kpi"><span>Yakunlangan savdolar</span><b>{{ s.deals }}</b><small>davrda: {{ s.deals_period }}</small></div>
+    <div class="kpi kpi-gold"><span>Undirilgan komissiya</span><b>{{ s.commission_paid|short }}</b><small>Voha: {{ s.voha_paid|short }}</small></div>
+    <div class="kpi"><span>Undirilmagan</span><b>{{ s.commission_unpaid|short }}</b><small>reklama: {{ s.ad_fees|short }}</small></div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="panel">
+      <div class="panel-head"><h2>Murojaat manbalari</h2></div>
+      {% set total_src = s.lead_sources.values()|sum %}
+      {% if total_src %}
+        <div class="bars">
+        {% for k, v in s.lead_sources.items() %}
+          <div class="bar-row">
+            <span>{{ SOURCES.get(k, k) }}</span>
+            <div class="bar"><i style="width: {{ (v * 100 / total_src)|round(1) }}%"></i></div>
+            <b>{{ v }}</b>
+          </div>
+        {% endfor %}
+        </div>
+      {% else %}<p class="muted">Hali murojaat yo‘q.</p>{% endif %}
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Obyektlar holati</h2></div>
+      {% set total_l = s.listings.values()|sum %}
+      {% if total_l %}
+        <div class="bars">
+        {% for k, v in s.listings.items() %}
+          <div class="bar-row">
+            <span>{{ LISTING_STATUSES.get(k, k) }}</span>
+            <div class="bar bar-green"><i style="width: {{ (v * 100 / total_l)|round(1) }}%"></i></div>
+            <b>{{ v }}</b>
+          </div>
+        {% endfor %}
+        </div>
+      {% else %}<p class="muted">Hali obyekt yo‘q.</p>{% endif %}
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>Moderatsiya va syomka navbati</h2><span class="muted small">{{ queue|length }} ta</span></div>
+    {% if queue %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>ID</th><th>Obyekt</th><th>Narx</th><th>Holat</th><th>Dublikat</th><th>Qo‘shilgan</th><th></th></tr></thead>
+        <tbody>
+        {% for l in queue %}
+          <tr>
+            <td><a href="/uy/{{ l.code }}">{{ l.code }}</a></td>
+            <td>{{ title(l) }}<br><span class="muted small">{{ l.district }}</span></td>
+            <td class="nowrap">{{ l.price|short }}</td>
+            <td>{{ status_badge(l.status) }}</td>
+            <td>{% if dups[l.id] %}<span class="pill pill-warn">⚠ {{ dups[l.id]|map(attribute='code')|join(', ') }}</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+            <td class="nowrap">{{ l.created_at|dt }}</td>
+            <td><a class="btn btn-sm btn-green" href="{{ admin_link(l.id) }}" target="_blank" rel="noopener">Botda ochish</a></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p class="muted">Navbat bo‘sh ✨</p>{% endif %}
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><h2>So‘nggi murojaatlar</h2></div>
+    {% if leads %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>#</th><th>Obyekt</th><th>Mijoz</th><th>Telefon</th><th>Manba</th><th>Holat</th><th>Sana</th></tr></thead>
+        <tbody>
+        {% for lead in leads %}
+          <tr>
+            <td>{{ lead.id }}</td>
+            <td><a href="/uy/{{ lead.code }}">{{ lead.code }}</a></td>
+            <td>{{ lead.buyer_name or '—' }}</td>
+            <td class="nowrap">{{ lead.buyer_phone }}</td>
+            <td>{{ SOURCES.get(lead.source, lead.source) }}</td>
+            <td>{{ lead_badge(lead.status) }}</td>
+            <td class="nowrap">{{ lead.created_at|dt }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p class="muted">Hali murojaat yo‘q.</p>{% endif %}
+  </div>
+
+  <div class="dash-grid">
+    <div class="panel">
+      <div class="panel-head"><h2>Undirilmagan komissiyalar</h2></div>
+      {% if unpaid %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>#</th><th>Obyekt</th><th>Komissiya</th><th>Sana</th></tr></thead>
+          <tbody>
+          {% for d in unpaid %}
+            <tr><td>{{ d.id }}</td><td>{{ d.code }}</td><td class="nowrap"><b>{{ d.commission|money }}</b></td><td class="nowrap">{{ d.created_at|dt }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}<p class="muted">Hammasi undirilgan ✨</p>{% endif %}
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Obyekt foydaliligi</h2></div>
+      {% if s.profit_listings %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Obyekt</th><th>Tushum</th><th>Xarajat</th><th>Foyda</th></tr></thead>
+          <tbody>
+          {% for r in s.profit_listings %}
+            {% set income = (r.income or 0) + (r.ad_fee or 0) %}
+            <tr><td>{{ r.code }}</td><td class="nowrap">{{ income|short }}</td><td class="nowrap">{{ (r.expenses or 0)|short }}</td><td class="nowrap"><b>{{ (income - (r.expenses or 0))|short }}</b></td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}<p class="muted">Bitimlar yopilgach ko‘rinadi.</p>{% endif %}
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="panel">
+      <div class="panel-head"><h2>Saytdan arizalar (uy egalari)</h2></div>
+      {% if requests %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>#</th><th>Maqsad</th><th>Ism</th><th>Telefon</th><th>Hudud</th><th>Sana</th></tr></thead>
+          <tbody>
+          {% for r in requests %}
+            <tr><td>{{ r.id }}</td><td>{{ r.kind }}</td><td>{{ r.name }}{% if r.comment %}<br><span class="muted small">{{ r.comment }}</span>{% endif %}</td><td class="nowrap">{{ r.phone }}</td><td>{{ r.district or '—' }}</td><td class="nowrap">{{ r.created_at|dt }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}<p class="muted">Hali ariza yo‘q.</p>{% endif %}
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>Makler arizalari</h2></div>
+      {% if brokers_pending %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>F.I.Sh</th><th>Telefon</th><th>Hudud</th><th>Tajriba</th></tr></thead>
+          <tbody>
+          {% for b in brokers_pending %}
+            <tr><td>{{ b.full_name }}</td><td class="nowrap">{{ b.phone }}</td><td>{{ b.district }}</td><td>{{ b.experience }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="muted small">Tasdiqlash: bot → /admin → «🤝 Arizalar».</p>
+      {% else %}<p class="muted">Yangi ariza yo‘q.</p>{% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

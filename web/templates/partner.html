@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero hero-compact">
+  <div class="hero-watermark" aria-hidden="true">VOHA UYLARI</div>
+  <div class="container hero-inner">
+    <p class="eyebrow">Maklerlar uchun hamkorlik</p>
+    <h1>Maklerlar tarmog‘i<br><span class="gold">yangi savdo yaratadi.</span></h1>
+    <p class="hero-lead">Obyekti bor makler va xaridori bor makler Voha Uylari orqali bog‘lanadi. Prodakshn, reklama va tizim — bizdan. Kelishilgan komissiya — aniq va shaffof.</p>
+    <div class="hero-actions">
+      <a class="btn btn-gold btn-lg" href="{{ join_link }}" target="_blank" rel="noopener">Botda hamkor bo‘lish</a>
+      <a class="btn btn-outline-light btn-lg" href="#kalkulyator">Ulushni hisoblash</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <p class="eyebrow">Uch model</p>
+    <h2>Kim qancha oladi — oldindan ma’lum</h2>
+    <p class="muted">Misol: 500 mln so‘mlik uy.</p>
+    <div class="models">
+      {% for m in (1, 2, 3) %}
+      {% set s = examples[m] %}
+      <article class="model {{ 'model-featured' if m == 2 }}">
+        <span class="model-tag">{{ m }}-model</span>
+        <h3>{{ MODELS[m].name.split('·')[1]|trim }}</h3>
+        <p class="muted small">{{ MODELS[m].desc }}</p>
+        <div class="split-bar" aria-hidden="true">
+          <i class="voha" style="flex: {{ s.voha_pct }}"></i><i class="broker" style="flex: {{ s.broker_pct }}"></i>
+        </div>
+        <dl class="split">
+          <div><dt>Jami</dt><dd>{{ s.total_pct|percent }}{% if MODELS[m].ad_fee %} + 500 ming{% endif %}</dd></div>
+          <div><dt><i class="dot voha"></i>Voha</dt><dd>{{ s.voha_pct|percent }} · {{ s.voha_share|short }}</dd></div>
+          <div class="hl"><dt><i class="dot broker"></i>Makler</dt><dd>{{ s.broker_pct|percent }} · {{ s.broker_share|short }}</dd></div>
+        </dl>
+      </article>
+      {% endfor %}
+    </div>
+    <p class="muted small">Umumiy foiz 2% dan farq qilsa, ulushlar alohida kelishiladi.</p>
+  </div>
+</section>
+
+<section class="section section-tint" id="kalkulyator">
+  <div class="container calc">
+    <div>
+      <p class="eyebrow">Kalkulyator</p>
+      <h2>Ulushingizni hisoblang</h2>
+      <label class="field">
+        <span>Uy narxi, mln so‘m</span>
+        <input type="number" id="calc-price" min="1" step="any" value="500" inputmode="decimal">
+      </label>
+    </div>
+    <div class="calc-results" id="calc-results" data-models='{{ {"1": [2, 1.2, 0.8], "2": [2, 0.8, 1.2], "3": [1, 0.5, 0.5]}|tojson }}'>
+      {% for m in (1, 2, 3) %}
+      <div class="calc-row" data-model="{{ m }}">
+        <span>{{ MODELS[m].name }}</span>
+        <b data-broker>—</b>
+      </div>
+      {% endfor %}
+      <p class="muted small">Makler ulushi. Model 3 da reklama uchun 500 000 so‘m alohida.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <p class="eyebrow">Ishonch</p>
+    <h2>Maklerning mijozi olib qo‘yilmaydi</h2>
+    <div class="features">
+      <div class="feature"><span class="feature-num">01</span><h3>Yagona ID</h3><p>Masalan: VU-0248. E’lon, video va bitim bitta raqamga bog‘lanadi.</p></div>
+      <div class="feature"><span class="feature-num">02</span><h3>Obyekt manbasi</h3><p>Mulk egasini kim olib kelgani tizimda aniq ko‘rsatiladi.</p></div>
+      <div class="feature"><span class="feature-num">03</span><h3>Mijoz himoyasi</h3><p>Mijozingizni birinchi qayd etsangiz, u sizga biriktiriladi. Boshqa maklerlar uning raqamini ko‘rmaydi.</p></div>
+      <div class="feature"><span class="feature-num">04</span><h3>Shartnoma</h3><p>Foiz, to‘lov muddati va ulushlar sotuvdan oldin shartnomada yoziladi.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="container faq">
+    <p class="eyebrow">Savollar</p>
+    <h2>Maklerlarning asosiy e’tirozlariga javob</h2>
+    <details><summary>Mijozimni olib qo‘ymaysizlarmi?</summary><p>Obyekt, xaridor manbasi va mas’ul makler tizimda qayd etiladi. Mijozni birinchi qayd etgan makler unga biriktiriladi.</p></details>
+    <details><summary>Nega 0,8% beraman?</summary><p>Prodakshn, reklama, tizim va qo‘shimcha obyektlar bazasidan foydalanasiz.</p></details>
+    <details><summary>Uy sotilmasa-chi?</summary><p>Foizli hamkorlikdagi savdo komissiyasi faqat bitim yakunlanganda olinadi.</p></details>
+    <details><summary>Barcha uyimni berishim shartmi?</summary><p>Yo‘q. Hamkorlikka kiritiladigan obyektlarni o‘zingiz tanlaysiz.</p></details>
+    <details><summary>Xaridorni siz topsangiz-chi?</summary><p>Oldindan tanlangan model bo‘yicha ulushlar shartnomada belgilanadi.</p></details>
+    <p class="muted small">Hamkorlik 2026-yil 8-noyabrdan kuchga kiradigan rieltorlik qoidalarini hisobga olgan holda shartnoma asosida yuritiladi.</p>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="container cta-inner">
+    <div>
+      <h2>Sizda uy bo‘lsa, <span class="gold">uni biz bilan kuchliroq sotasiz.</span></h2>
+      <p>Qo‘shilish bepul — ariza 2 daqiqada, Telegram-bot orqali.</p>
+    </div>
+    <a class="btn btn-gold btn-lg" href="{{ join_link }}" target="_blank" rel="noopener">Hamkor bo‘lish</a>
+  </div>
+</section>
+{% endblock %}

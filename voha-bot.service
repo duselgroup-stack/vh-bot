@@ -1,0 +1,16 @@
+[Unit]
+Description=VOHA UYLARI Telegram bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/voha_uylari_bot
+ExecStart=/opt/voha_uylari_bot/venv/bin/python bot.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field_error %}
+{% block content %}
+<section class="hero hero-compact">
+  <div class="hero-watermark" aria-hidden="true">VOHA UYLARI</div>
+  <div class="container hero-inner">
+    <p class="eyebrow">Uy egalari uchun</p>
+    <h1>Uyingizni <span class="gold">professional</span> soting.</h1>
+    <p class="hero-lead">Syomka, video montaj va Instagram/Telegram reklamasi. Har bir tarifda shartlar oldindan tushuntiriladi.</p>
+    <div class="hero-actions">
+      <a class="btn btn-gold btn-lg" href="#ariza">Ariza qoldirish</a>
+      <a class="btn btn-outline-light btn-lg" href="{{ bot_sell }}" target="_blank" rel="noopener">Botda e’lon berish</a>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <p class="eyebrow">Tariflar</p>
+    <h2>Xizmat tanlovi aniq</h2>
+    <div class="tariffs">
+      <article class="tariff">
+        <span class="tariff-num">01</span>
+        <h3>Faqat reklama</h3>
+        <div class="tariff-price">500 000 <small>so‘m</small></div>
+        <p>Syomka, video va Instagramga joylashtirish. Sotuv foizi alohida kelishilmasa olinmaydi.</p>
+      </article>
+      <article class="tariff tariff-featured">
+        <span class="tariff-num">02</span>
+        <h3>To‘liq sotuv</h3>
+        <div class="tariff-price">2%</div>
+        <p>Obyekt Voha Uylari tomonidan yuritiladi; hamkor makler sotuvga jalb qilinishi mumkin. To‘lov faqat uy sotilganda.</p>
+      </article>
+      <article class="tariff">
+        <span class="tariff-num">03</span>
+        <h3>Reklama + savdo</h3>
+        <div class="tariff-price">500 ming <small>+ 1%</small></div>
+        <p>Reklama oldindan to‘lanadi, sotuv komissiyasi faqat bitim bo‘lsa yuzaga keladi.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tint">
+  <div class="container">
+    <p class="eyebrow">Jarayon</p>
+    <h2>Har bir bitim yetti bosqichda nazorat qilinadi</h2>
+    <ol class="steps">
+      <li><b>Obyekt qabul qilinadi</b><span>Mulk egasi, mas’ul makler va model belgilanadi.</span></li>
+      <li><b>Syomka rejalashtiriladi</b><span>Taqdimot, narx va asosiy afzalliklar tayyorlanadi.</span></li>
+      <li><b>E’lon joylashtiriladi</b><span>Instagram, Telegram va sayt orqali chiqariladi.</span></li>
+      <li><b>Mijoz manbasi qayd etiladi</b><span>Xaridor kim orqali kelgani tizimda belgilanadi.</span></li>
+      <li><b>Uy ko‘rish tashkil qilinadi</b><span>Mas’ul makler jarayonni olib boradi.</span></li>
+      <li><b>Bitim natijasi belgilanadi</b><span>Sotilgan, muzokarada yoki faol statusi yangilanadi.</span></li>
+      <li><b>Komissiya hisoblanadi</b><span>Oldindan kelishilgan foizlar bo‘yicha to‘lov ajratiladi.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section" id="ariza">
+  <div class="container form-wrap">
+    <div>
+      <p class="eyebrow">Ariza</p>
+      <h2>Qo‘ng‘iroq qilamiz va shartlarni tushuntiramiz</h2>
+      <p class="muted">Ma’lumot qoldiring — menejer siz bilan bog‘lanadi, syomka vaqtini va tarifni kelishadi. Yoki e’lonni Telegram-botda o‘zingiz bering.</p>
+      <a class="btn btn-tg" href="{{ bot_sell }}" target="_blank" rel="noopener">Telegram-botda e’lon berish</a>
+    </div>
+    <div class="side-card">
+      {% if sent %}
+        <div class="success">
+          <div class="success-icon">✓</div>
+          <h3>Arizangiz qabul qilindi!</h3>
+          <p>Menejer tez orada siz bilan bog‘lanadi.</p>
+        </div>
+      {% else %}
+        {% if errors.umumiy %}<div class="alert">{{ errors.umumiy }}</div>{% endif %}
+        <form method="post" action="/uy-sotish" class="lead-form" novalidate>
+          <input type="hidden" name="token" value="{{ token }}">
+          <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <div class="seg seg-light" role="radiogroup" aria-label="Maqsad">
+            {% for val, label in [('s', 'Sotish'), ('r', 'Ijaraga berish'), ('ad', 'Faqat reklama')] %}
+              <label><input type="radio" name="maqsad" value="{{ val }}" {{ 'checked' if (form.maqsad or 's') == val }}><span>{{ label }}</span></label>
+            {% endfor %}
+          </div>
+          <label class="field {{ 'has-error' if errors.ism }}">
+            <span>Ismingiz</span>
+            <input name="ism" required maxlength="80" autocomplete="name" value="{{ form.ism or '' }}">
+            {{ field_error(errors, 'ism') }}
+          </label>
+          <label class="field {{ 'has-error' if errors.telefon }}">
+            <span>Telefon</span>
+            <input name="telefon" type="tel" required inputmode="tel" autocomplete="tel" placeholder="+998 90 123 45 67" value="{{ form.telefon or '' }}">
+            {{ field_error(errors, 'telefon') }}
+          </label>
+          <label class="field">
+            <span>Hudud</span>
+            <select name="hudud">
+              <option value="">Tanlang</option>
+              {% for d in DISTRICTS %}<option value="{{ loop.index0 }}" {{ 'selected' if form.hudud == loop.index0|string }}>{{ d }}</option>{% endfor %}
+            </select>
+          </label>
+          <label class="field">
+            <span>Uy haqida qisqacha (ixtiyoriy)</span>
+            <textarea name="izoh" rows="3" maxlength="500" placeholder="Masalan: 4 xonali hovli, 6 sotix, taxminiy narx…">{{ form.izoh or '' }}</textarea>
+          </label>
+          <label class="check {{ 'has-error' if errors.rozilik }}">
+            <input type="checkbox" name="rozilik" value="1" {{ 'checked' if form.rozilik }}>
+            <span>Ma’lumotlarim faqat xizmat ko‘rsatish maqsadida ishlatilishiga roziman.</span>
+          </label>
+          {{ field_error(errors, 'rozilik') }}
+          <button class="btn btn-gold btn-block btn-lg" type="submit">Ariza yuborish</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

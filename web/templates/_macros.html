@@ -1,0 +1,51 @@
+{% macro placeholder(ptype) -%}
+<div class="ph ph-{{ ptype }}" aria-hidden="true">
+  <svg viewBox="0 0 120 90"><path d="M20 48 60 18l40 30v30a3 3 0 0 1-3 3H71V58H49v23H23a3 3 0 0 1-3-3z" fill="currentColor" opacity=".18"/><path d="M14 50 60 15l46 35" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".35"/></svg>
+  <span>Syomka tayyorlanmoqda</span>
+</div>
+{%- endmacro %}
+
+{% macro listing_card(l) -%}
+<a class="card" href="/uy/{{ l.code }}">
+  <div class="card-media">
+    {% if cover(l) %}
+      <img src="{{ cover(l) }}" alt="{{ title(l) }}, {{ l.district }}" loading="lazy">
+    {% else %}
+      {{ placeholder(l.property_type) }}
+    {% endif %}
+    <div class="card-badges">
+      <span class="badge {{ 'badge-rent' if l.deal_type == 'r' else 'badge-sale' }}">{{ 'Ijara' if l.deal_type == 'r' else 'Sotuv' }}</span>
+      {% if l.status == 'negotiation' %}<span class="badge badge-warn">Muzokarada</span>{% endif %}
+      {% if l.video %}<span class="badge badge-dark">▶ Video</span>{% endif %}
+    </div>
+    {% if l.photos and l.photos|length > 1 %}<span class="card-count">📷 {{ l.photos|length }}</span>{% endif %}
+  </div>
+  <div class="card-body">
+    <div class="card-price">{{ l.price|short }}{% if l.deal_type == 'r' %}<small> / oy</small>{% endif %}</div>
+    <div class="card-title">{{ title(l) }}</div>
+    <div class="card-meta">
+      <span>📍 {{ l.district }}</span>
+      <span class="code">{{ l.code }}</span>
+    </div>
+  </div>
+</a>
+{%- endmacro %}
+
+{% macro status_badge(status) -%}
+<span class="pill pill-{{ status }}">{{ LISTING_STATUSES.get(status, status) }}</span>
+{%- endmacro %}
+
+{% macro lead_badge(status) -%}
+<span class="pill pill-lead-{{ status }}">{{ LEAD_STATUSES.get(status, status) }}</span>
+{%- endmacro %}
+
+{% macro stage_dots(done) -%}
+<span class="stages" title="{{ done }}/7 bosqich">
+  {% for i in range(7) %}<i class="{{ 'on' if i < done }}"></i>{% endfor %}
+  <b>{{ done }}/7</b>
+</span>
+{%- endmacro %}
+
+{% macro field_error(errors, name) -%}
+{% if errors.get(name) %}<span class="field-error">{{ errors[name] }}</span>{% endif %}
+{%- endmacro %}

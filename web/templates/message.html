@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="container message-page">
+  <div class="message-card">
+    <div class="message-icon">{{ icon }}</div>
+    <h1>{{ heading }}</h1>
+    <p class="muted">{{ text }}</p>
+    <div class="hero-actions center">
+      {% if cta %}<a class="btn btn-gold" href="{{ cta[1] }}" {% if cta[1].startswith('http') %}target="_blank" rel="noopener"{% endif %}>{{ cta[0] }}</a>{% endif %}
+      <a class="btn btn-ghost" href="/">Bosh sahifa</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
